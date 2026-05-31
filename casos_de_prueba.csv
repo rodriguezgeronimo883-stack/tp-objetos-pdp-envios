@@ -1,0 +1,64 @@
+import csv
+import unittest
+
+from envio import (
+    Servicio,
+    Destino,
+    Paquete,
+    CalculadoraEnvio
+)
+
+
+MAPA_SERVICIOS = {
+    "estandar": Servicio.ESTANDAR,
+    "express": Servicio.EXPRESS,
+    "mismo_dia": Servicio.MISMO_DIA,
+    "retiro_en_sucursal": Servicio.RETIRO_EN_SUCURSAL,
+}
+
+MAPA_DESTINOS = {
+    "caba": Destino.CABA,
+    "gba": Destino.GBA,
+    "interior": Destino.INTERIOR,
+    "patagonia": Destino.PATAGONIA,
+}
+
+
+class TestDesdeCSV(unittest.TestCase):
+
+    def test_casos_csv(self):
+
+        with open(
+            "casos_de_prueba.csv",
+            newline="",
+            encoding="utf-8"
+        ) as archivo:
+
+            lector = csv.DictReader(archivo)
+
+            for fila in lector:
+
+                paquete = Paquete(
+                    float(fila["peso_real"]),
+                    float(fila["largo"]),
+                    float(fila["ancho"]),
+                    float(fila["alto"])
+                )
+
+                costo = CalculadoraEnvio.calcular_costo(
+                    MAPA_SERVICIOS[fila["servicio"]],
+                    MAPA_DESTINOS[fila["destino"]],
+                    paquete
+                )
+
+                esperado = float(fila["costo_esperado"])
+
+                self.assertAlmostEqual(
+                    costo,
+                    esperado,
+                    places=2
+                )
+
+
+if __name__ == "__main__":
+    unittest.main()
